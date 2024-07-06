@@ -1,5 +1,5 @@
 use memchr::memchr;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs::File;
 use std::io::{self, Read, Write};
 
@@ -12,7 +12,7 @@ struct Measurement {
 }
 
 fn main() {
-    let mut accumulator: BTreeMap<&str, Measurement> = BTreeMap::new();
+    let mut accumulator: HashMap<&str, Measurement> = HashMap::new();
     let mut buf = vec![];
 
     let mut file = File::open("./measurements.txt").unwrap();
@@ -23,10 +23,13 @@ fn main() {
         process_line(line, &mut accumulator);
     }
 
-    print_results(&accumulator);
+    let mut ordered_accumulator: BTreeMap<&str, Measurement> = BTreeMap::new();
+    ordered_accumulator.extend(accumulator);
+
+    print_results(&ordered_accumulator);
 }
 
-fn process_line<'a>(line: &'a [u8], accumulator: &mut BTreeMap<&'a str, Measurement>) {
+fn process_line<'a>(line: &'a [u8], accumulator: &mut HashMap<&'a str, Measurement>) {
     let index = memchr(b';', line).unwrap();
     let city = &line[..index];
     let key = unsafe { std::str::from_utf8_unchecked(city) };
