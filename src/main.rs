@@ -1,5 +1,6 @@
 use memchr::memchr;
-use std::collections::{BTreeMap, HashMap};
+use rustc_hash::FxHashMap;
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{self, Read, Write};
 
@@ -12,7 +13,7 @@ struct Measurement {
 }
 
 fn main() {
-    let mut accumulator: HashMap<&str, Measurement> = HashMap::new();
+    let mut accumulator: FxHashMap<&str, Measurement> = FxHashMap::default();
     let mut buf = vec![];
 
     let mut file = File::open("./measurements.txt").unwrap();
@@ -29,7 +30,7 @@ fn main() {
     print_results(&ordered_accumulator);
 }
 
-fn process_line<'a>(line: &'a [u8], accumulator: &mut HashMap<&'a str, Measurement>) {
+fn process_line<'a>(line: &'a [u8], accumulator: &mut FxHashMap<&'a str, Measurement>) {
     let index = memchr(b';', line).unwrap();
     let city = &line[..index];
     let key = unsafe { std::str::from_utf8_unchecked(city) };

@@ -9,3 +9,4 @@ debug = true
 [dependencies]
 fast-float = "0.2.0"
 memchr = "2.7.4"
+rustc-hash = "2.0.0"
