@@ -11,23 +11,28 @@ struct Measurement {
 }
 
 fn main() {
-    let mut accumulator: BTreeMap<String, Measurement> = BTreeMap::new();
-    let mut buf = String::new();
+    let mut accumulator: BTreeMap<&str, Measurement> = BTreeMap::new();
+    let mut buf = vec![];
 
     let mut file = File::open("./measurements.txt").unwrap();
-    file.read_to_string(&mut buf).unwrap();
-    assert!(buf.pop() == Some('\n'));
-    for line in buf.split('\n') {
+    file.read_to_end(&mut buf).unwrap();
+    assert!(buf.pop() == Some(b'\n'));
+
+    for line in buf.split(|&c| c == b'\n') {
         process_line(line, &mut accumulator);
     }
 
     print_results(&accumulator);
 }
 
-fn process_line(line: &str, accumulator: &mut BTreeMap<String, Measurement>) {
-    let parts: Vec<&str> = line.split(";").collect();
-    let key = String::from(parts[0]);
-    let value = String::from(parts[1]).parse::<f32>().unwrap();
+fn process_line<'a>(line: &'a [u8], accumulator: &mut BTreeMap<&'a str, Measurement>) {
+    let parts = line.split(|&c| c == b';').collect::<Vec<_>>();
+    let key = unsafe { std::str::from_utf8_unchecked(parts[0]) };
+    let value = unsafe {
+        std::str::from_utf8_unchecked(parts[1])
+            .parse::<f32>()
+            .unwrap()
+    };
 
     match accumulator.get_mut(&key) {
         Some(measurement) => {
@@ -35,7 +40,7 @@ fn process_line(line: &str, accumulator: &mut BTreeMap<String, Measurement>) {
         }
         None => {
             accumulator.insert(
-                key.to_string(),
+                key,
                 Measurement {
                     min: value,
                     max: value,
@@ -54,7 +59,7 @@ fn update_measurement(measurement: &mut Measurement, value: f32) {
     measurement.count += 1;
 }
 
-fn print_results(accumulator: &BTreeMap<String, Measurement>) {
+fn print_results(accumulator: &BTreeMap<&str, Measurement>) {
     let stdout = io::stdout();
     let mut handle = stdout.lock();
     for (key, measurement) in accumulator.iter() {
