@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 use std::fs::File;
-use std::io::{self, BufReader, Read, Write};
+use std::io::{self, Read, Write};
 
 #[derive(Debug)]
 struct Measurement {
@@ -14,9 +14,8 @@ fn main() {
     let mut accumulator: BTreeMap<String, Measurement> = BTreeMap::new();
     let mut buf = String::new();
 
-    let file = File::open("./measurements.txt").unwrap();
-    let mut reader = BufReader::new(file);
-    reader.read_to_string(&mut buf).unwrap();
+    let mut file = File::open("./measurements.txt").unwrap();
+    file.read_to_string(&mut buf).unwrap();
     assert!(buf.pop() == Some('\n'));
     for line in buf.split('\n') {
         process_line(line, &mut accumulator);
