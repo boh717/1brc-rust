@@ -7,3 +7,5 @@ edition = "2021"
 debug = true
 
 [dependencies]
+fast-float = "0.2.0"
+memchr = "2.7.4"
