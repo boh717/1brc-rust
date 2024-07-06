@@ -3,5 +3,7 @@ name = "billion-challenge-rust"
 version = "0.1.0"
 edition = "2021"
 
+[profile.release]
+debug = true
+
 [dependencies]
-crossbeam-channel = "0.5.13"
