@@ -1,4 +1,4 @@
-use memchr::memchr;
+use memchr::*;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -18,10 +18,12 @@ fn main() {
 
     let mut file = File::open("./measurements.txt").unwrap();
     file.read_to_end(&mut buf).unwrap();
-    assert!(buf.pop() == Some(b'\n'));
+    assert!(buf.last() == Some(&b'\n'));
 
-    for line in buf.split(|&c| c == b'\n') {
-        process_line(line, &mut accumulator);
+    let mut start: usize = 0;
+    for index in memchr_iter(b'\n', &buf) {
+        process_line(&buf[start..index], &mut accumulator);
+        start = index + 1;
     }
 
     let mut ordered_accumulator: BTreeMap<&str, Measurement> = BTreeMap::new();
