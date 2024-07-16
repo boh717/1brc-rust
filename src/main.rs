@@ -1,8 +1,9 @@
 use memchr::*;
+use memmap2::Mmap;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
 use std::fs::File;
-use std::io::{self, Read, Write};
+use std::io::{self, Write};
 
 #[derive(Debug)]
 struct Measurement {
@@ -14,10 +15,9 @@ struct Measurement {
 
 fn main() {
     let mut accumulator: FxHashMap<&str, Measurement> = FxHashMap::default();
-    let mut buf = vec![];
 
-    let mut file = File::open("./measurements.txt").unwrap();
-    file.read_to_end(&mut buf).unwrap();
+    let file = File::open("./measurements.txt").unwrap();
+    let buf = unsafe { Mmap::map(&file).unwrap() };
     assert!(buf.last() == Some(&b'\n'));
 
     let mut start: usize = 0;
